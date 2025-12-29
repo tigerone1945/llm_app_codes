@@ -66,7 +66,7 @@ def init_messages():
 
 
 def select_model():
-    models = ("GPT-4", "Claude 3.5 Sonnet", "Gemini 1.5 Pro", "GPT-3.5 (not recommended)")
+    models = ("GPT-4", "Claude 4.5 Sonnet", "Gemini 2.5 Flash", "GPT-3.5 (not recommended)")
     model = st.sidebar.radio("Choose a model:", models)
     if model == "GPT-3.5 (not recommended)":
         return ChatOpenAI(
@@ -74,12 +74,12 @@ def select_model():
     elif model == "GPT-4":
         return ChatOpenAI(
             temperature=0, model_name="gpt-4o")
-    elif model == "Claude 3.5 Sonnet":
+    elif model == "Claude 4.5 Sonnet":
         return ChatAnthropic(
-            temperature=0, model_name="claude-3-5-sonnet-20240620")
-    elif model == "Gemini 1.5 Pro":
+            temperature=0, model_name="claude-sonnet-4-5-20250929")
+    elif model == "Gemini 2.5 Flash":
         return ChatGoogleGenerativeAI(
-            temperature=0, model="gemini-1.5-pro-latest")
+            temperature=0, model="gemini-2.5-flash")
 
 
 def create_agent():

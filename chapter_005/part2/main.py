@@ -45,7 +45,7 @@ def init_page():
 
 
 def select_model(temperature=0):
-    models = ("GPT-3.5", "GPT-4", "Claude 3.5 Sonnet", "Gemini 1.5 Pro")
+    models = ("GPT-3.5", "GPT-4", "Claude 4.5 Sonnet", "Gemini 2.5 Flash")
     model = st.sidebar.radio("Choose a model:", models)
     if model == "GPT-3.5":
         return ChatOpenAI(
@@ -57,15 +57,15 @@ def select_model(temperature=0):
             temperature=temperature,
             model_name="gpt-4o"
         )
-    elif model == "Claude 3.5 Sonnet":
+    elif model == "Claude 4.5 Sonnet":
         return ChatAnthropic(
             temperature=temperature,
-            model_name="claude-3-5-sonnet-20240620"
+            model_name="claude-sonnet-4-5-20250929"
         )
-    elif model == "Gemini 1.5 Pro":
+    elif model == "Gemini 2.5 Flash":
         return ChatGoogleGenerativeAI(
             temperature=temperature,
-            model="gemini-1.5-pro-latest"
+            model="gemini-2.5-flash"
         )
 
 
