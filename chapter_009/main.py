@@ -1,10 +1,9 @@
 # GitHub: https://github.com/naotaka1128/llm_app_codes/chapter_009/main.py
 import streamlit as st
-from langchain.agents import create_tool_calling_agent, AgentExecutor
-from langchain.memory import ConversationBufferWindowMemory
-from langchain_core.prompts import MessagesPlaceholder, ChatPromptTemplate
+from langchain.agents import create_agent as create_langchain_agent
 from langchain_core.runnables import RunnableConfig
 from langchain_community.callbacks import StreamlitCallbackHandler
+from langchain_core.messages import HumanMessage
 
 # models
 from langchain_openai import ChatOpenAI
@@ -68,20 +67,11 @@ def init_page():
 
 def init_messages():
     clear_button = st.sidebar.button("Clear Conversation", key="clear")
-    if clear_button or "messages" not in st.session_state:
+    if clear_button or "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
         st.session_state.messages = [
             {"role": "assistant", "content": "こんにちは！なんでも質問をどうぞ！"}
         ]
-        st.session_state['memory'] = ConversationBufferWindowMemory(
-            return_messages=True,
-            memory_key="chat_history",
-            k=10
-        )
-
-        # このようにも書ける
-        # from langchain_community.chat_message_histories import StreamlitChatMessageHistory
-        # msgs = StreamlitChatMessageHistory(key="special_app_key")
-        # st.session_state['memory'] = ConversationBufferMemory(memory_key="history", chat_memory=msgs)
 
 
 def select_model():
@@ -103,20 +93,15 @@ def select_model():
 
 def create_agent():
     tools = [search_ddg, fetch_page]
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", CUSTOM_SYSTEM_PROMPT),
-        MessagesPlaceholder(variable_name="chat_history"),
-        ("user", "{input}"),
-        MessagesPlaceholder(variable_name="agent_scratchpad")
-    ])
     llm = select_model()
-    agent = create_tool_calling_agent(llm, tools, prompt)
-    return AgentExecutor(
-        agent=agent,
-        tools=tools,
-        verbose=True,
-        memory=st.session_state['memory']
+
+    # LangChainのcreate_agentを使用（システムプロンプトを含める）
+    agent = create_langchain_agent(
+        llm,
+        tools,
+        system_prompt=CUSTOM_SYSTEM_PROMPT
     )
+    return agent
 
 
 def main():
@@ -124,10 +109,13 @@ def main():
     init_messages()
     web_browsing_agent = create_agent()
 
-    for msg in st.session_state['memory'].chat_memory.messages:
-        st.chat_message(msg.type).write(msg.content)
+    # チャット履歴を表示
+    for msg in st.session_state.messages:
+        st.chat_message(msg["role"]).write(msg["content"])
 
     if prompt := st.chat_input(placeholder="2023 FIFA 女子ワールドカップの優勝国は？"):
+        # ユーザーメッセージを表示
+        st.session_state.messages.append({"role": "user", "content": prompt})
         st.chat_message("user").write(prompt)
 
         with st.chat_message("assistant"):
@@ -137,10 +125,22 @@ def main():
 
             # エージェントを実行
             response = web_browsing_agent.invoke(
-                {'input': prompt},
+                {"messages": st.session_state.chat_history + [HumanMessage(content=prompt)]},
                 config=RunnableConfig({'callbacks': [st_cb]})
             )
-            st.write(response["output"])
+
+            # 最後のメッセージを取得
+            last_message = response["messages"][-1]
+            answer = last_message.content
+
+            # チャット履歴に追加
+            st.session_state.chat_history.append(HumanMessage(content=prompt))
+            st.session_state.chat_history.append(last_message)
+
+            # 表示用メッセージに追加
+            st.session_state.messages.append({"role": "assistant", "content": answer})
+
+            st.write(answer)
 
 
 if __name__ == '__main__':

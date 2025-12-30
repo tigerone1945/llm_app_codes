@@ -3,7 +3,7 @@
 from itertools import islice
 from duckduckgo_search import DDGS
 from langchain_core.tools import tool
-from langchain_core.pydantic_v1 import (BaseModel, Field)
+from pydantic import BaseModel, Field
 
 
 """

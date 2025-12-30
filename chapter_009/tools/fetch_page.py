@@ -4,7 +4,7 @@ import requests
 import html2text
 from readability import Document
 from langchain_core.tools import tool
-from langchain_core.pydantic_v1 import (BaseModel, Field)
+from pydantic import BaseModel, Field
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
