@@ -105,14 +105,16 @@ def get_content(url):
     with st.spinner("Fetching Youtube ..."):
         loader = YoutubeLoader.from_youtube_url(
             url,
-            add_video_info=True,  # タイトルや再生数も取得できる
+            add_video_info=False,  # pytubeの問題を回避するためFalseに変更
             language=['en', 'ja']  # 英語→日本語の優先順位で字幕を取得
         )
         res = loader.load()  # list of `Document` (page_content, metadata)
         try:
             if res:
                 content = res[0].page_content
-                title = res[0].metadata['title']
+                # add_video_info=Falseの場合、metadataにtitleがない可能性があるので、
+                # sourceから取得するか、デフォルト値を使用
+                title = res[0].metadata.get('title', res[0].metadata.get('source', 'Unknown'))
                 return f"Title: {title}\n\n{content}"
             else:
                 return None

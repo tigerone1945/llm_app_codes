@@ -19,7 +19,7 @@ beautifulsoup4==4.12.3
 langchain_text_splitters==0.0.1
 
 # Youtube要約アプリ用
-youtube-transcript-api==0.6.2
+youtube-transcript-api==1.2.3
 pytube==15.0.0
 
 # chapter 7
